@@ -15,27 +15,71 @@ $(function () {
   var initSearchType = searchTypeStore.get();
   $searchLogo.addClass(initSearchType).data('type', initSearchType);
 
-  var search_types = [
-    { url: 'https://www.baidu.com/s?wd=', type: 'baidu' },
-    { url: 'https://www.sogou.com/web?query=', type: 'sogou' },
-    { url: 'https://cn.bing.com/search?q=', type: 'bing' },
-    { url: 'https://www.so.com/s?q=', type: 'so' },
-    { url: 'https://www.google.com/search?q=', type: 'google' },
-    { url: 'http://www.cilimao.cc/search?word=', type: 'cili' },
-    { url: 'http://neets.cc/search?key=', type: 'yingyin' },
-    { url: 'http://www.panduoduo.net/s/name/', type: 'wangpan' },
+  var search_types = [{
+      url: 'https://www.baidu.com/s?wd=',
+      type: 'baidu'
+    },
+    {
+      url: 'https://www.sogou.com/web?query=',
+      type: 'sogou'
+    },
+    {
+      url: 'https://cn.bing.com/search?q=',
+      type: 'bing'
+    },
+    {
+      url: 'https://www.so.com/s?q=',
+      type: 'so'
+    },
+    {
+      url: 'https://www.google.com/search?q=',
+      type: 'google'
+    },
+    {
+      url: 'http://www.cilimao.cc/search?word=',
+      type: 'cili'
+    },
+    {
+      url: 'http://neets.cc/search?key=',
+      type: 'yingyin'
+    },
+    {
+      url: 'http://www.panduoduo.net/s/name/',
+      type: 'wangpan'
+    },
   ];
   $searchLogo.on('click', function () {
     $searchMethods.show();
   });
+/*兼容处理 低版本IE*/
+//
+Array.prototype.find || (Array.prototype.find = function (predicate) { 
+    if (this == null) {
+      throw new TypeError('Array.prototype.find called on null or undefined');
+    }
+    if (typeof predicate !== 'function') {
+      throw new TypeError('predicate must be a function');
+    }
+    var list = Object(this);
+    var length = list.length || 0;
+    var thisArg = arguments[1];
+    var value;
 
+    for (var i = 0; i < length; i++) {
+      value = list[i];
+      if (predicate.call(thisArg, value, i, list)) {
+        return value;
+      }
+    }
+    return null;
+})
   // 搜索引擎切换
   $searchMethods.on('click', 'li', function () {
     var type = $(this).data('type');
     searchTypeStore.set(type);
     $searchLogo.removeClass()
-    .data('type', type)
-    .addClass(type + ' search-logo');
+      .data('type', type)
+      .addClass(type + ' search-logo');
     $searchMethods.hide();
     $('#search_keyword').focus();
   });
@@ -48,72 +92,73 @@ $(function () {
   // 关键词搜索输入
   $('#search_keyword').on('keyup', function (event) {
     var keyword = $(this).val();
-    if(event.which==13){
-    	if($('#search_result .active').length>0){
-    		keyword = $('#search_result .active').eq(0).text();
-    	}
+    if (event.which == 13) {
+      if ($('#search_result .active').length > 0) {
+        keyword = $('#search_result .active').eq(0).text();
+      }
       openSearch(keyword)
       return;
     }
     // TODO 上下键选择待选答案
     var bl = moveChange(event);
-    if(bl){
-    	keywordChange(keyword);
+    if (bl) {
+      keywordChange(keyword);
     }
-  }).on('blur', function () { 
-  // 推荐结果跳转
-  $('#search_result').on('click', 'li', function () {
-    var word = $(this).text();
-    $('#search_keyword').val(word);
-    openSearch(word);
-    $('#search_result').hide();
-  });
-  // 解决失焦和点击事件冲突问题
-  setTimeout(function() {
-    $('#search_result').hide();
-  }, 100)
+  }).on('blur', function () {
+    // 推荐结果跳转
+    $('#search_result').on('click', 'li', function () {
+      var word = $(this).text();
+      $('#search_keyword').val(word);
+      openSearch(word);
+      $('#search_result').hide();
+    });
+    // 解决失焦和点击事件冲突问题
+    setTimeout(function () {
+      $('#search_result').hide();
+    }, 100)
   }).on('focus', function () {
     var keyword = $(this).val();
     keywordChange(keyword);
   });
-  
-  function moveChange(e){
-		var k = e.keyCode || e.which;
-		var bl = true;
-		switch(k){
-			case 38:
-				rowMove('top');
-				bl = false;
-				break;
-			case 40:
-				rowMove('down');
-				bl = false;
-				break;
-		}
-		return bl;
-	}
-  function rowMove(move){
-  	var search_result = $('#search_result');
-  	var hove_li = null;
-  	search_result.find('.result-item').each(function(){
-  		if($(this).hasClass('active')){
-  			hove_li = $(this).index();
-  		}
-  	});
-  	if(move == 'top'){
-  		if(hove_li==null){
-	  		hove_li = search_result.find('.result-item').length-1;
-	  	}else{
-	  		hove_li--;
-	  	}
-  	}else if(move == 'down'){
-  		if(hove_li==null){
-	  		hove_li = 0;
-	  	}else{
-	  		hove_li==search_result.find('.result-item').length-1?(hove_li=0):(hove_li++);
-	  	}
-  	}
-  	search_result.find('.active').removeClass('active');
+
+  function moveChange(e) {
+    var k = e.keyCode || e.which;
+    var bl = true;
+    switch (k) {
+      case 38:
+        rowMove('top');
+        bl = false;
+        break;
+      case 40:
+        rowMove('down');
+        bl = false;
+        break;
+    }
+    return bl;
+  }
+
+  function rowMove(move) {
+    var search_result = $('#search_result');
+    var hove_li = null;
+    search_result.find('.result-item').each(function () {
+      if ($(this).hasClass('active')) {
+        hove_li = $(this).index();
+      }
+    });
+    if (move == 'top') {
+      if (hove_li == null) {
+        hove_li = search_result.find('.result-item').length - 1;
+      } else {
+        hove_li--;
+      }
+    } else if (move == 'down') {
+      if (hove_li == null) {
+        hove_li = 0;
+      } else {
+        hove_li == search_result.find('.result-item').length - 1 ? (hove_li = 0) : (hove_li++);
+      }
+    }
+    search_result.find('.active').removeClass('active');
     search_result.find('.result-item').eq(hove_li).addClass('active');
     $('#search_keyword').val(search_result.find('.result-item').eq(hove_li).addClass('active').text());
   }
@@ -135,16 +180,14 @@ $(function () {
   });
 
   // 点击高亮显示
-  $('#search_keyword').on('focus',  function () {
-    $('.search-left').css(
-      {
-        "border-style":"solid",
-        "border-color": "rgba(24, 144, 255, 1)",
-        "box-shadow": "0px 0px 2px 1px rgba(145, 213, 255, 0.96)",
-      }
-    );
-  }).on('blur',  function () {
-    $('.search-left').prop('style','');
+  $('#search_keyword').on('focus', function () {
+    $('.search-left').css({
+      "border-style": "solid",
+      "border-color": "rgba(24, 144, 255, 1)",
+      "box-shadow": "0px 0px 2px 1px rgba(145, 213, 255, 0.96)",
+    });
+  }).on('blur', function () {
+    $('.search-left').prop('style', '');
   });
   // 搜索
   $('#search_submit').on('click', function () {
