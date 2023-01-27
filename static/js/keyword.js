@@ -51,9 +51,8 @@ $(function () {
   $searchLogo.on('click', function () {
     $searchMethods.show();
   });
-/*兼容处理 低版本IE*/
-//
-Array.prototype.find || (Array.prototype.find = function (predicate) { 
+  //兼容IE浏览器
+  Array.prototype.find || (Array.prototype.find = function (predicate) { 
     if (this == null) {
       throw new TypeError('Array.prototype.find called on null or undefined');
     }
@@ -72,7 +71,7 @@ Array.prototype.find || (Array.prototype.find = function (predicate) {
       }
     }
     return null;
-})
+  })
   // 搜索引擎切换
   $searchMethods.on('click', 'li', function () {
     var type = $(this).data('type');
